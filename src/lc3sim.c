@@ -246,7 +246,7 @@ void disassemble_to_str(short instruction, char* buffer)
 		if (inst.imm5_flag)
 			sprintf(buffer, "ADD R%d, R%d, #%d", inst.destreg, inst.src1reg, inst.imm5);
 		else
-			sprintf(buffer, "ADD R%d, R%d, R%d", inst.destreg, inst.src2reg, inst.src2reg);
+			sprintf(buffer, "ADD R%d, R%d, R%d", inst.destreg, inst.src1reg, inst.src2reg);
 		break;
 	case LD:
 		sprintf(buffer, "LD R%d, #%d", inst.destreg, inst.pcoffset9);
@@ -261,7 +261,7 @@ void disassemble_to_str(short instruction, char* buffer)
 		if (inst.imm5_flag)
 			sprintf(buffer, "AND R%d, R%d, #%d", inst.destreg, inst.src1reg, inst.imm5);
 		else
-			sprintf(buffer, "AND R%d, R%d, R%d", inst.destreg, inst.src2reg, inst.src2reg);
+			sprintf(buffer, "AND R%d, R%d, R%d", inst.destreg, inst.src1reg, inst.src2reg);
 		break;
 	case LDR:
 		sprintf(buffer, "LDR R%d, R%d, #%d", inst.destreg, inst.src1reg, inst.offset6);
