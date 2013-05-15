@@ -25,8 +25,6 @@ int main(int argc, char* argv[])
 	int ch;
 	initialize();
 
-	step_forward();
-	refreshall();
 	while(ch != KEY_F(1))
 	{
 		ch = getch();
