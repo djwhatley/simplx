@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <errno.h>
+#include <string.h>
 #include "../include/lc3sim.h"
 #include "../include/lc3gui.h"
 
@@ -22,7 +23,7 @@ int main(int argc, char* argv[])
 	pc = 0x3000;
 	running = 1;
 
-	//set_breakpoint(0x3006);
+	set_breakpoint(0x3006);
 
 	int ch;
 	initialize();
@@ -37,7 +38,11 @@ int main(int argc, char* argv[])
 		case KEY_F(6):
 			run_program();
 			break;
-		case KEY_F(2):
+		case KEY_F(3):
+			dbgwin_state = 1;
+			break;
+		case KEY_F(8):
+			dbgwin_state = 2;
 			break;
 		}
 		refreshall();
@@ -68,6 +73,9 @@ void initialize()
 	wprintw(reg_win, "Registers");
 	wprintw(cns_win, "Console");
 	wprintw(dbg_win, "Debugging");
+	
+	dbgwin_state = 0;
+	memwin_state = 0;
 
 	refreshall();
 }
@@ -102,11 +110,12 @@ void refreshall()
 void update_memwin()
 {
 	int i;
-	mem_index = pc;
+	if (!memwin_state)
+		mem_index = pc;
 	for (i; i<LINES-DEBUGWIN_HEIGHT-WINDOW_PADDING*2; i++)
 	{
 		short addr = mem_index-(LINES-DEBUGWIN_HEIGHT-WINDOW_PADDING)/2+i;
-		short curr = mem[addr];
+		short curr = mem[(unsigned short)addr];
 		char binstring[20];
 		char disasmstr[35];
 		hex_to_binstr(curr, binstring);
@@ -119,6 +128,7 @@ void update_memwin()
 		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr);
 		wattroff(MEMWIN, A_STANDOUT);
 	}
+	memwin_state = 0;
 }
 
 void update_regwin()
@@ -133,7 +143,46 @@ void update_regwin()
 
 void update_dbgwin()
 {
-	mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "F5 - Step | F6 - Run | F1 - Exit");
+	int i, j;
+	char goaddr[6];
+	char realaddr[7];
+	for (i=0; i<DEBUGWIN_HEIGHT-WINDOW_PADDING*2; i++)
+		for (j=0; j<COLS-WINDOW_PADDING*2; j++)
+			mvwprintw(DBGWIN, i+WINDOW_PADDING, j+WINDOW_PADDING, " ");
+	switch (dbgwin_state) {
+	case 0:
+		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "F5 - Step | F6 - Run | F1 - Exit");
+		break;
+	case 1:
+		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Goto address: ");
+		wrefresh(DBGWIN);
+		move(LINES-DEBUGWIN_HEIGHT+WINDOW_PADDING, 16);
+		curs_set(1);
+		getstr(goaddr);
+		realaddr[0] = '0';
+		strcpy(&realaddr[1], goaddr);
+		sscanf(realaddr, "%x", &mem_index);
+		curs_set(0);
+		dbgwin_state = 0;
+		memwin_state = 1;
+		refreshall();
+		break;
+	case 2:
+		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ");
+		wrefresh(DBGWIN);
+		move(LINES-DEBUGWIN_HEIGHT+WINDOW_PADDING, 22);
+		curs_set(1);
+		getstr(goaddr);
+		realaddr[0] = '0';
+		strcpy(&realaddr[1], goaddr);
+		short a;
+		sscanf(realaddr, "%x", &a);
+		set_breakpoint((unsigned short)a);
+		curs_set(0);
+		dbgwin_state = 0;
+		refreshall();
+		break;
+	}
 }
 
 void hex_to_binstr(short hex, char* buffer)

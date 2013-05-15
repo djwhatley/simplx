@@ -196,14 +196,17 @@ void run_program()
 	running = 1;
 	while (running && !halted)
 	{
-		if (brk[pc])
+		if (brk[pc] == 1)
 		{
 			running = 0;
+			brk[pc] = 2;
 			break;
 		}
 		next = fetch_instruction();
 		decode_instruction(&instruction, next);
 		execute_instruction(&instruction);
+		if (brk[pc] == 2)
+			brk[pc] = 1;
 	}
 }
 

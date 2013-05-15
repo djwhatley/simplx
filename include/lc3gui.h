@@ -17,6 +17,8 @@
 static WINDOW* windows[NUM_WINDOWS];
 static int windex;
 static int mem_index;
+static int memwin_state;
+static int dbgwin_state;
 
 WINDOW* create_win(int height, int width, int starty, int startx);
 void destroy_win(WINDOW* local_win);
