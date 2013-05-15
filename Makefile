@@ -5,7 +5,7 @@ ASM=asm
 default: lc3sim program test
 
 lc3sim:
-	gcc -g -o $(OBJ)/lc3sim $(SRC)/* 
+	gcc -g -o $(OBJ)/lc3sim -lncurses $(SRC)/* 
 
 program:
 	as2obj $(ASM)/program.asm $(OBJ)/program

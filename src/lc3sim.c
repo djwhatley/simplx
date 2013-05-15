@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../include/lc3sim.h"
 
 static FILE* file;
@@ -72,7 +73,6 @@ void execute_instruction(lc3inst_t* instruction)
 	short old_pc;
 	switch (instruction->opcode) {
 	case BR:
-		printf("BRANCH\n");
 		if (comparenzp(instruction->nzpbits))
 			pc += instruction->pcoffset9;
 		break;
@@ -188,37 +188,89 @@ void read_program(FILE* program)
 	}
 }
 
-int main(int argc, char* argv[])
+void run_program()
 {
-	if (argc != 2)
-	{
-		printf("Bad arguments! Just give me a filename of an assembled LC-3 program!\n");
-		exit(-1);
-	}
-
-	FILE* program = fopen(argv[1], "r");
-	if (!program)
-	{
-		printf("File not found!\n");
-		exit(-1);
-	}
-
-	read_program(program);
-
-	running = 1;
-	pc = 0x3000;
-
 	short next;
 	lc3inst_t instruction;
 	while (running)
 	{
 		next = fetch_instruction();
-		printf("x%.4hx\n", next);
 		decode_instruction(&instruction, next);
 		execute_instruction(&instruction);
 	}
+}
 
-	show_register_contents();
+void step_forward()
+{
+	if (!running)
+		return;
 
-	return 0;
+	short next = fetch_instruction();
+	lc3inst_t instruction;
+	decode_instruction(&instruction, next);
+	execute_instruction(&instruction);
+
+}
+
+void disassemble_to_str(short instruction, char* buffer)
+{
+	lc3inst_t inst;
+	decode_instruction(&inst, instruction);
+	char* nzpstrings[8] = { "", "p", "z", "zp", "n", "np", "nz", "nzp" };
+
+	switch(inst.opcode) {
+	case BR:
+		if (!inst.nzpbits)
+			sprintf(buffer, "NOP");
+		else
+			sprintf(buffer, "BR%s #%d", nzpstrings[inst.nzpbits], inst.pcoffset9);
+		break;
+	case ADD:
+		if (inst.imm5_flag)
+			sprintf(buffer, "ADD R%d, R%d, #%d", inst.destreg, inst.src1reg, inst.imm5);
+		else
+			sprintf(buffer, "ADD R%d, R%d, R%d", inst.destreg, inst.src2reg, inst.src2reg);
+		break;
+	case LD:
+		sprintf(buffer, "LD R%d, #%d", inst.destreg, inst.pcoffset9);
+		break;
+	case ST:
+		sprintf(buffer, "ST R%d, #%d", inst.destreg, inst.pcoffset9);
+		break;
+	case JSR:
+		// TODO
+		break;
+	case AND:
+		if (inst.imm5_flag)
+			sprintf(buffer, "AND R%d, R%d, #%d", inst.destreg, inst.src1reg, inst.imm5);
+		else
+			sprintf(buffer, "AND R%d, R%d, R%d", inst.destreg, inst.src2reg, inst.src2reg);
+		break;
+	case LDR:
+		sprintf(buffer, "LDR R%d, R%d, #%d", inst.destreg, inst.src1reg, inst.offset6);
+		break;
+	case STR:
+		sprintf(buffer, "STR R%d, R%d, #%d", inst.destreg, inst.src1reg, inst.offset6);
+		break;
+	case RTI:
+		break;
+	case NOT:
+		sprintf(buffer, "NOT R%d, R%d", inst.destreg, inst.src1reg);
+		break;
+	case LDI:
+		sprintf(buffer, "LDI R%d, #%d", inst.destreg, inst.pcoffset9);
+		break;
+	case STI:
+		sprintf(buffer, "STI R%d, #%d", inst.destreg, inst.pcoffset9);
+		break;
+	case JMP:
+		sprintf(buffer, "JMP R%d", inst.src1reg);
+		break;
+	case LEA:
+		sprintf(buffer, "LEA R%d, #%d", inst.destreg, inst.pcoffset9);
+		break;
+	case TRAP:
+		sprintf(buffer, "TRAP x%.2hx", inst.trapvect);
+		break;
+	}
 }

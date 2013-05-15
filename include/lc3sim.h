@@ -46,13 +46,13 @@ typedef struct {
 	char imm5_flag;
 } lc3inst_t;
 
-static unsigned short regfile[8];
-static unsigned short pc;
-static unsigned short ir;
-static unsigned short cc;
-static unsigned short mem[65536];
+unsigned short regfile[8];
+unsigned short pc;
+unsigned short ir;
+unsigned short cc;
+unsigned short mem[65536];
 
-static int running;
+int running;
 
 short get_instruction();
 void decode_instruction(lc3inst_t* instruction, short raw_inst);
@@ -63,4 +63,8 @@ short signext(char value, char bits);
 void show_register_contents();
 void read_program(FILE* program);
 
+void run_program();
+void step_forward();
+
+void disassemble_to_str(short inst, char* buffer);
 #endif
