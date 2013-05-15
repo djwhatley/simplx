@@ -51,8 +51,10 @@ unsigned short pc;
 unsigned short ir;
 unsigned short cc;
 unsigned short mem[65536];
+unsigned char brk[65536];
 
 int running;
+int halted;
 
 short get_instruction();
 void decode_instruction(lc3inst_t* instruction, short raw_inst);
@@ -65,6 +67,8 @@ void read_program(FILE* program);
 
 void run_program();
 void step_forward();
+void set_breakpoint(unsigned short address);
+void unset_breakpoint(unsigned short address);
 
 void disassemble_to_str(short inst, char* buffer);
 #endif

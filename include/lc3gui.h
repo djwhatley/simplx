@@ -6,7 +6,7 @@
 #define NUM_WINDOWS 4
 #define REGWIN_WIDTH 25
 #define REGWIN_HEIGHT 14
-#define DEBUGWIN_HEIGHT 5
+#define DEBUGWIN_HEIGHT 6
 #define WINDOW_PADDING 2
 
 #define MEMWIN windows[0]
@@ -25,6 +25,7 @@ void refreshall();
 
 void update_memwin();
 void update_regwin();
+void update_dbgwin();
 
 void hex_to_binstr(short hex, char* buffer);
 

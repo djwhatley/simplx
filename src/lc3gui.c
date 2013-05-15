@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
 	pc = 0x3000;
 	running = 1;
 
+	//set_breakpoint(0x3006);
+
 	int ch;
 	initialize();
 
@@ -90,6 +92,7 @@ void refreshall()
 	int i;
 	update_memwin();
 	update_regwin();
+	update_dbgwin();
 	for (i=0; i<windex; i++)
 		wrefresh(windows[i]);
 	refresh();
@@ -108,12 +111,12 @@ void update_memwin()
 		char disasmstr[35];
 		hex_to_binstr(curr, binstring);
 		disassemble_to_str(curr, disasmstr);
-		if (pc == addr)
+		if ((halted ? pc-1 : pc) == addr)
 			wattron(MEMWIN, A_STANDOUT);
 		int c;
 		for (c=0; c<COLS-REGWIN_WIDTH-WINDOW_PADDING*2; c++)
 			mvwprintw(MEMWIN, i+WINDOW_PADDING, c+WINDOW_PADDING, " ");
-		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "x%.4hx\t x%.4hx\t %.5d\t %s\t %s", addr, curr, curr, binstring, disasmstr);
+		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr);
 		wattroff(MEMWIN, A_STANDOUT);
 	}
 }
@@ -126,6 +129,11 @@ void update_regwin()
 	mvwprintw(REGWIN, WINDOW_PADDING+6, WINDOW_PADDING, "PC: x%.4hx", pc);
 	mvwprintw(REGWIN, WINDOW_PADDING+7, WINDOW_PADDING, "IR: x%.4hx", ir);
 	mvwprintw(REGWIN, WINDOW_PADDING+8, WINDOW_PADDING, "CC: x%.4hx", cc);
+}
+
+void update_dbgwin()
+{
+	mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "F5 - Step | F6 - Run | F1 - Exit");
 }
 
 void hex_to_binstr(short hex, char* buffer)

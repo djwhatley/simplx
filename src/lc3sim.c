@@ -139,6 +139,7 @@ void execute_instruction(lc3inst_t* instruction)
 		case 0x20:
 			break;
 		case 0x25:
+			halted = 1;
 			running = 0;
 			break;
 		default:
@@ -192,8 +193,14 @@ void run_program()
 {
 	short next;
 	lc3inst_t instruction;
-	while (running)
+	running = 1;
+	while (running && !halted)
 	{
+		if (brk[pc])
+		{
+			running = 0;
+			break;
+		}
 		next = fetch_instruction();
 		decode_instruction(&instruction, next);
 		execute_instruction(&instruction);
@@ -202,7 +209,7 @@ void run_program()
 
 void step_forward()
 {
-	if (!running)
+	if (halted)
 		return;
 
 	short next = fetch_instruction();
@@ -210,6 +217,16 @@ void step_forward()
 	decode_instruction(&instruction, next);
 	execute_instruction(&instruction);
 
+}
+
+void set_breakpoint(unsigned short address)
+{
+	brk[address] = 1;
+}
+
+void unset_breakpoint(unsigned short address)
+{
+	brk[address] = 0;
 }
 
 void disassemble_to_str(short instruction, char* buffer)
