@@ -23,8 +23,6 @@ int main(int argc, char* argv[])
 	pc = 0x3000;
 	running = 1;
 
-	set_breakpoint(0x3006);
-
 	int ch;
 	initialize();
 
@@ -154,31 +152,21 @@ void update_dbgwin()
 		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "F5 - Step | F6 - Run | F1 - Exit");
 		break;
 	case 1:
-		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Goto address: ");
-		wrefresh(DBGWIN);
-		move(LINES-DEBUGWIN_HEIGHT+WINDOW_PADDING, 16);
-		curs_set(1);
-		getstr(goaddr);
+		mvwgetstrw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Goto address: ", goaddr);
 		realaddr[0] = '0';
 		strcpy(&realaddr[1], goaddr);
 		sscanf(realaddr, "%x", &mem_index);
-		curs_set(0);
 		dbgwin_state = 0;
 		memwin_state = 1;
 		refreshall();
 		break;
 	case 2:
-		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ");
-		wrefresh(DBGWIN);
-		move(LINES-DEBUGWIN_HEIGHT+WINDOW_PADDING, 22);
-		curs_set(1);
-		getstr(goaddr);
+		mvwgetstrw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ", goaddr);
 		realaddr[0] = '0';
 		strcpy(&realaddr[1], goaddr);
 		short a;
 		sscanf(realaddr, "%x", &a);
 		set_breakpoint((unsigned short)a);
-		curs_set(0);
 		dbgwin_state = 0;
 		refreshall();
 		break;
@@ -195,4 +183,15 @@ void hex_to_binstr(short hex, char* buffer)
 	int d = (hex & 0x000F) >> 0;
 
 	sprintf(buffer, "%s %s %s %s", strings[a], strings[b], strings[c], strings[d]);
+}
+
+void mvwgetstrw(WINDOW* window, int y, int x, const char* prompt, char* buffer)
+{
+	mvwprintw(window, y, x, prompt);
+	wrefresh(window);
+	move(LINES-DEBUGWIN_HEIGHT+y, x+strlen(prompt));
+
+	curs_set(1);
+	getstr(buffer);
+	curs_set(0);
 }

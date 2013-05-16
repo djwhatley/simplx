@@ -30,5 +30,6 @@ void update_regwin();
 void update_dbgwin();
 
 void hex_to_binstr(short hex, char* buffer);
+void mvwgetstrw(WINDOW* window, int y, int x, const char* prompt, char* buffer);
 
 #endif
