@@ -39,8 +39,32 @@ int main(int argc, char* argv[])
 		case KEY_F(3):
 			dbgwin_state = 1;
 			break;
+		case KEY_F(7):
+			memwin_state = (memwin_state == 2 ? 0 : 2);
+			mem_cursor = mem_index;
+			break;
 		case KEY_F(8):
 			dbgwin_state = 2;
+			break;
+		case KEY_UP:
+			if (memwin_state == 2)
+				mem_cursor--;
+			break;
+		case KEY_DOWN:
+			if (memwin_state == 2)
+				mem_cursor++;
+			break;
+		case KEY_NPAGE:
+			if (memwin_state == 2)
+				mem_cursor += (LINES-DEBUGWIN_HEIGHT);
+			break;
+		case KEY_PPAGE:
+			if (memwin_state == 2)
+				mem_cursor -= (LINES-DEBUGWIN_HEIGHT);
+			break;
+		case 0xA:
+			if (memwin_state ==2)
+				brk[(unsigned short)mem_cursor] ^= 1;
 			break;
 		}
 		refreshall();
@@ -57,6 +81,9 @@ void initialize()
 	cbreak();
 	curs_set(0);
 	keypad(stdscr, TRUE);
+	
+	start_color();
+	init_pair(1, COLOR_BLACK, COLOR_GREEN);
 
 	refresh();
 
@@ -110,23 +137,29 @@ void update_memwin()
 	int i;
 	if (!memwin_state)
 		mem_index = pc;
+	else if (memwin_state == 2)
+		mem_index = mem_cursor;
 	for (i; i<LINES-DEBUGWIN_HEIGHT-WINDOW_PADDING*2; i++)
 	{
-		short addr = mem_index-(LINES-DEBUGWIN_HEIGHT-WINDOW_PADDING)/2+i;
+		unsigned short addr = mem_index-(LINES-DEBUGWIN_HEIGHT-WINDOW_PADDING)/2+i;
 		short curr = mem[(unsigned short)addr];
 		char binstring[20];
 		char disasmstr[35];
 		hex_to_binstr(curr, binstring);
 		disassemble_to_str(curr, disasmstr);
-		if ((halted ? pc-1 : pc) == addr)
+		if (mem_cursor == addr && memwin_state == 2)
+			wattron(MEMWIN, COLOR_PAIR(1));
+		else if ((halted ? pc-1 : pc) == addr)
 			wattron(MEMWIN, A_STANDOUT);
 		int c;
 		for (c=0; c<COLS-REGWIN_WIDTH-WINDOW_PADDING*2; c++)
 			mvwprintw(MEMWIN, i+WINDOW_PADDING, c+WINDOW_PADDING, " ");
 		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr);
 		wattroff(MEMWIN, A_STANDOUT);
+		wattroff(MEMWIN, COLOR_PAIR(1));
 	}
-	memwin_state = 0;
+	if (memwin_state != 2)
+		memwin_state = 0;
 }
 
 void update_regwin()
@@ -152,16 +185,19 @@ void update_dbgwin()
 		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "F5 - Step | F6 - Run | F1 - Exit");
 		break;
 	case 1:
-		mvwgetstrw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Goto address: ", goaddr);
+		dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "Goto address: ", goaddr);
 		realaddr[0] = '0';
 		strcpy(&realaddr[1], goaddr);
 		sscanf(realaddr, "%x", &mem_index);
 		dbgwin_state = 0;
-		memwin_state = 1;
+		if (!memwin_state)
+			memwin_state = 1;
+		else if (memwin_state == 2)
+			mem_cursor = mem_index;
 		refreshall();
 		break;
 	case 2:
-		mvwgetstrw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ", goaddr);
+		dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ", goaddr);
 		realaddr[0] = '0';
 		strcpy(&realaddr[1], goaddr);
 		short a;
@@ -185,10 +221,10 @@ void hex_to_binstr(short hex, char* buffer)
 	sprintf(buffer, "%s %s %s %s", strings[a], strings[b], strings[c], strings[d]);
 }
 
-void mvwgetstrw(WINDOW* window, int y, int x, const char* prompt, char* buffer)
+void dbggetstrw(int y, int x, const char* prompt, char* buffer)
 {
-	mvwprintw(window, y, x, prompt);
-	wrefresh(window);
+	mvwprintw(DBGWIN, y, x, prompt);
+	wrefresh(DBGWIN);
 	move(LINES-DEBUGWIN_HEIGHT+y, x+strlen(prompt));
 
 	curs_set(1);

@@ -16,7 +16,8 @@
 
 static WINDOW* windows[NUM_WINDOWS];
 static int windex;
-static int mem_index;
+static unsigned short mem_index;
+static unsigned short mem_cursor;
 static int memwin_state;
 static int dbgwin_state;
 
@@ -30,6 +31,6 @@ void update_regwin();
 void update_dbgwin();
 
 void hex_to_binstr(short hex, char* buffer);
-void mvwgetstrw(WINDOW* window, int y, int x, const char* prompt, char* buffer);
+void dbggetstrw(int y, int x, const char* prompt, char* buffer);
 
 #endif
