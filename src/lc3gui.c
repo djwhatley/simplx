@@ -197,12 +197,14 @@ void update_dbgwin()
 		refreshall();
 		break;
 	case 2:
-		dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ", goaddr);
+		//dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ", goaddr);
+		dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "New value: ", goaddr);
 		realaddr[0] = '0';
 		strcpy(&realaddr[1], goaddr);
 		short a;
 		sscanf(realaddr, "%x", &a);
-		set_breakpoint((unsigned short)a);
+		//set_breakpoint((unsigned short)a);
+		mem[mem_cursor] = a;
 		dbgwin_state = 0;
 		refreshall();
 		break;

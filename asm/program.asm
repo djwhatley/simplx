@@ -1,6 +1,5 @@
 .orig x40
-	ADD R6, R6, 13
-	RET
+	.fill x4000
 .end
 
 .orig x3000
@@ -26,4 +25,9 @@ M7
 
 STUFF .fill OTHERSTUFF
 OTHERSTUFF .fill x1337
+.end
+
+.orig x4000
+	ADD R6, R6, 13
+	RET
 .end

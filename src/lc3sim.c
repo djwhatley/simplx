@@ -144,7 +144,7 @@ void execute_instruction(lc3inst_t* instruction)
 			break;
 		default:
 			old_pc = pc;
-			pc = instruction->trapvect;
+			pc = mem[instruction->trapvect];
 			regfile[7] = old_pc;
 			break;
 		}
