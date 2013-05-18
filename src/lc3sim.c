@@ -173,6 +173,8 @@ void read_program(FILE* program)
 	unsigned char num = 0;
 	unsigned short b;
 
+	rewind(program);
+
 	while(a != 0xffff)
 	{
 		a = ((fgetc(program) << 8) | fgetc(program));
