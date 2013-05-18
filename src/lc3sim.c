@@ -151,7 +151,7 @@ void execute_instruction(lc3inst_t* instruction)
 	}
 }
 
-void show_register_contents()
+/*void show_register_contents()
 {
 	printf("Register contents:\n"
 				 "R0: x%.4hx\tR1: x%.4hx\n"
@@ -164,7 +164,7 @@ void show_register_contents()
 				 regfile[6], regfile[7]
 			);
 	printf("PC: x%.4hx\n", pc);
-}
+}*/
 
 void read_program(FILE* program)
 {
@@ -187,26 +187,30 @@ void read_program(FILE* program)
 			num--;
 		}
 	}
+
+	next = fetch_instruction();
+	decode_instruction(&next_inst, next);
 }
 
 void run_program()
 {
-	short next;
-	lc3inst_t instruction;
 	running = 1;
 	while (running && !halted)
 	{
-		if (brk[pc] == 1)
+		if (brk[pc-1] == 1)
 		{
 			running = 0;
-			brk[pc] = 2;
+			brk[pc-1] = 2;
 			break;
 		}
-		next = fetch_instruction();
-		decode_instruction(&instruction, next);
-		execute_instruction(&instruction);
-		if (brk[pc] == 2)
-			brk[pc] = 1;
+		execute_instruction(&next_inst);
+		if (!halted)
+		{
+			next = fetch_instruction();
+			decode_instruction(&next_inst, next);
+		}
+		if (brk[pc-1] == 2)
+			brk[pc-1] = 1;
 	}
 }
 
@@ -214,11 +218,11 @@ void step_forward()
 {
 	if (halted)
 		return;
-
-	short next = fetch_instruction();
-	lc3inst_t instruction;
-	decode_instruction(&instruction, next);
-	execute_instruction(&instruction);
+	
+	execute_instruction(&next_inst);
+	if (halted) return;
+	next = fetch_instruction();
+	decode_instruction(&next_inst, next);
 
 }
 

@@ -19,9 +19,9 @@ int main(int argc, char* argv[])
 		return -EINVAL;
 	}
 
-	read_program(program);
 	pc = 0x3000;
 	running = 1;
+	read_program(program);
 
 	int ch;
 	initialize();
@@ -136,7 +136,7 @@ void update_memwin()
 {
 	int i;
 	if (!memwin_state)
-		mem_index = pc;
+		mem_index = pc-1;
 	else if (memwin_state == 2)
 		mem_index = mem_cursor;
 	for (i; i<LINES-DEBUGWIN_HEIGHT-WINDOW_PADDING*2; i++)
@@ -149,7 +149,7 @@ void update_memwin()
 		disassemble_to_str(curr, disasmstr);
 		if (mem_cursor == addr && memwin_state == 2)
 			wattron(MEMWIN, COLOR_PAIR(1));
-		else if ((halted ? pc-1 : pc) == addr)
+		else if (pc-1 == addr)
 			wattron(MEMWIN, A_STANDOUT);
 		int c;
 		for (c=0; c<COLS-REGWIN_WIDTH-WINDOW_PADDING*2; c++)
@@ -182,7 +182,7 @@ void update_dbgwin()
 			mvwprintw(DBGWIN, i+WINDOW_PADDING, j+WINDOW_PADDING, " ");
 	switch (dbgwin_state) {
 	case 0:
-		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "F5 - Step | F6 - Run | F1 - Exit");
+		mvwprintw(DBGWIN, WINDOW_PADDING, WINDOW_PADDING, "F5 - Step | F6 - Run | F7 - Memory Explorer | F1 - Exit");
 		break;
 	case 1:
 		dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "Goto address: ", goaddr);
@@ -197,13 +197,11 @@ void update_dbgwin()
 		refreshall();
 		break;
 	case 2:
-		//dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "Breakpoint address: ", goaddr);
 		dbggetstrw(WINDOW_PADDING, WINDOW_PADDING, "New value: ", goaddr);
 		realaddr[0] = '0';
 		strcpy(&realaddr[1], goaddr);
 		short a;
 		sscanf(realaddr, "%x", &a);
-		//set_breakpoint((unsigned short)a);
 		mem[mem_cursor] = a;
 		dbgwin_state = 0;
 		refreshall();

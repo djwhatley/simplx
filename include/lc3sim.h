@@ -55,6 +55,9 @@ unsigned char brk[65536];
 
 int running;
 int halted;
+int first;
+short next;
+lc3inst_t next_inst;
 
 short get_instruction();
 void decode_instruction(lc3inst_t* instruction, short raw_inst);
@@ -71,4 +74,5 @@ void set_breakpoint(unsigned short address);
 void unset_breakpoint(unsigned short address);
 
 void disassemble_to_str(short inst, char* buffer);
+
 #endif
