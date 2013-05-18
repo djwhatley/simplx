@@ -30,14 +30,17 @@ int main(int argc, char* argv[])
 	{
 		ch = getch();
 		switch (ch) {
+		case KEY_F(2):
+			reset_program(program);
+			break;
+		case KEY_F(3):
+			dbgwin_state = 1;
+			break;
 		case KEY_F(5):
 			step_forward();
 			break;
 		case KEY_F(6):
 			run_program();
-			break;
-		case KEY_F(3):
-			dbgwin_state = 1;
 			break;
 		case KEY_F(7):
 			memwin_state = (memwin_state == 2 ? 0 : 2);

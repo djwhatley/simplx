@@ -72,6 +72,7 @@ void run_program();
 void step_forward();
 void set_breakpoint(unsigned short address);
 void unset_breakpoint(unsigned short address);
+void reset_program(FILE* program);
 
 void disassemble_to_str(short inst, char* buffer);
 

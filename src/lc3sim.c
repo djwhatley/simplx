@@ -192,6 +192,20 @@ void read_program(FILE* program)
 	decode_instruction(&next_inst, next);
 }
 
+void reset_program(FILE* program)
+{
+	pc = 0x3000;
+	running = 1;
+	halted = 0;
+	read_program(program);
+	
+	int i;
+	for(i=0; i<8; i++)
+		regfile[i] = 0;
+
+	cc = 0;
+}
+
 void run_program()
 {
 	running = 1;
