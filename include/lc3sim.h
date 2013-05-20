@@ -52,6 +52,10 @@ unsigned short ir;
 unsigned short cc;
 unsigned short mem[65536];
 unsigned char brk[65536];
+unsigned char* console;
+int cns_index;
+int cns_length;
+int cns_max;
 
 int running;
 int halted;
@@ -66,6 +70,7 @@ void setcc(short writeval);
 char comparenzp(char nzp);
 short signext(char value, char bits);
 void show_register_contents();
+void send_to_console(char c);
 void read_program(FILE* program);
 
 void run_program();

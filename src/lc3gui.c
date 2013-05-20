@@ -1,6 +1,7 @@
 #include <ncurses.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 #include "../include/lc3sim.h"
 #include "../include/lc3gui.h"
 
@@ -35,6 +36,8 @@ int main(int argc, char* argv[])
 			break;
 		case KEY_F(3):
 			dbgwin_state = 1;
+			break;
+		case KEY_F(4):
 			break;
 		case KEY_F(5):
 			step_forward();
@@ -104,6 +107,11 @@ void initialize()
 	
 	dbgwin_state = 0;
 	memwin_state = 0;
+	cnswin_state = 0;
+
+	console = (char*)malloc(CONSOLE_SIZE);
+	cns_index = 0;
+	cns_max = CONSOLE_SIZE;
 
 	refreshall();
 }
@@ -129,6 +137,7 @@ void refreshall()
 	update_memwin();
 	update_regwin();
 	update_dbgwin();
+	update_cnswin();
 	for (i=0; i<windex; i++)
 		wrefresh(windows[i]);
 	refresh();
@@ -209,6 +218,16 @@ void update_dbgwin()
 		dbgwin_state = 0;
 		refreshall();
 		break;
+	}
+}
+
+void update_cnswin()
+{
+	int i, j;
+	for (i = cns_index; i != (cns_index ? cns_index-1 : cns_length); i++)
+	{
+		j = i - cns_index;
+		mvwaddch(CNSWIN, j/(REGWIN_WIDTH-2)+1, j%(REGWIN_WIDTH-2)+1, console[i]);
 	}
 }
 

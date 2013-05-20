@@ -71,6 +71,7 @@ void decode_instruction(lc3inst_t* instruction, short raw_inst)
 void execute_instruction(lc3inst_t* instruction)
 {
 	short old_pc;
+	short old_reg0;
 	switch (instruction->opcode) {
 	case BR:
 		if (comparenzp(instruction->nzpbits))
@@ -138,6 +139,18 @@ void execute_instruction(lc3inst_t* instruction)
 		switch (instruction->trapvect) {
 		case 0x20:
 			break;
+		case 0x21:
+			send_to_console((char)mem[regfile[0]]);
+			break;
+		case 0x22:
+			old_reg0 = regfile[0];
+			while (mem[regfile[0]])
+			{
+				send_to_console((char)mem[regfile[0]]);
+				regfile[0]++;
+			}
+			regfile[0] = old_reg0;
+			break;
 		case 0x25:
 			halted = 1;
 			running = 0;
@@ -148,6 +161,7 @@ void execute_instruction(lc3inst_t* instruction)
 			regfile[7] = old_pc;
 			break;
 		}
+		break;
 	}
 }
 
@@ -165,6 +179,17 @@ void execute_instruction(lc3inst_t* instruction)
 			);
 	printf("PC: x%.4hx\n", pc);
 }*/
+
+void send_to_console(const char c)
+{
+	static int cindex = 0;
+	console[cindex] = c;
+	cindex++;
+	if (cns_length < cns_max)
+		cns_length++;
+	if (cindex-1 >= cns_length)
+		cindex %= cns_length;
+}
 
 void read_program(FILE* program)
 {
@@ -189,6 +214,9 @@ void read_program(FILE* program)
 			num--;
 		}
 	}
+
+	cns_index = 0;
+	cns_length = 0;
 
 	next = fetch_instruction();
 	decode_instruction(&next_inst, next);
