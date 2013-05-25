@@ -16,15 +16,15 @@ M7
 	BRP M7
 
 	LD R3, STUFF
-	LDR R4, R3, 0
+	LDR R0, R3, 0
 	
 	TRAP x40
-	GETC
+	OUT
 
 	HALT
 
 STUFF .fill OTHERSTUFF
-OTHERSTUFF .fill x1337
+OTHERSTUFF .fill 65
 .end
 
 .orig x4000

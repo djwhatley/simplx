@@ -11,10 +11,10 @@ simplx:
 	gcc -g -o $(OBJ)/simplx -lncurses $(SRC)/*
 
 program:
-	as2obj $(ASM)/program.asm $(OBJ)/program
+	as2obj $(ASM)/program.asm
 
 test:
-	$(OBJ)/simplx $(OBJ)/program.obj
+	$(OBJ)/simplx $(ASM)/program.obj
 
 #old:
 #	$(OBJ)/lc3sim $(OBJ)/program.obj
