@@ -140,7 +140,7 @@ void execute_instruction(lc3inst_t* instruction)
 		case 0x20:
 			break;
 		case 0x21:
-			send_to_console((char)mem[regfile[0]]);
+			send_to_console((char)regfile[0]);
 			break;
 		case 0x22:
 			old_reg0 = regfile[0];
