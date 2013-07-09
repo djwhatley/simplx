@@ -163,6 +163,7 @@ void execute_instruction(lc3inst_t* instruction)
 		}
 		break;
 	}
+	executions++;
 }
 
 /*void show_register_contents()
@@ -227,6 +228,7 @@ void reset_program(FILE* program)
 	pc = 0x3000;
 	running = 1;
 	halted = 0;
+	executions = 0;
 	read_program(program);
 	
 	int i;
@@ -247,12 +249,13 @@ void run_program()
 			brk[pc-1] = 2;
 			break;
 		}
-		execute_instruction(&next_inst);
-		if (!halted)
-		{
-			next = fetch_instruction();
-			decode_instruction(&next_inst, next);
-		}
+		//execute_instruction(&next_inst);
+		//if (!halted)
+		//{
+		//	next = fetch_instruction();
+		//	decode_instruction(&next_inst, next);
+		//}
+		step_forward();
 		if (brk[pc-1] == 2)
 			brk[pc-1] = 1;
 	}

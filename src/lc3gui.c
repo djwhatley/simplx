@@ -182,6 +182,7 @@ void update_regwin()
 	mvwprintw(REGWIN, WINDOW_PADDING+6, WINDOW_PADDING, "PC: x%.4hx", pc);
 	mvwprintw(REGWIN, WINDOW_PADDING+7, WINDOW_PADDING, "IR: x%.4hx", ir);
 	mvwprintw(REGWIN, WINDOW_PADDING+8, WINDOW_PADDING, "CC: x%.4hx", cc);
+	mvwprintw(REGWIN, WINDOW_PADDING+9, WINDOW_PADDING, "EX: %d", executions);
 }
 
 void update_dbgwin()

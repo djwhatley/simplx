@@ -29,6 +29,12 @@
 #define JSRR_SHFT 11
 #define IMMF_SHFT 5
 
+#define KBSR mem[0xFE00]
+#define KBDR mem[0xFE02]
+#define DSR mem[0xFE04]
+#define DDR mem[0xFE06]
+#define MCR mem[0xFFFE]
+
 typedef enum {BR, ADD, LD, ST, JSR, AND, LDR, STR, RTI, NOT, LDI, STI, JMP, LOLFENDERCODE, LEA, TRAP} opcode_t;
 
 typedef struct {
@@ -49,10 +55,11 @@ typedef struct {
 unsigned short regfile[8];
 unsigned short pc;
 unsigned short ir;
-unsigned short cc;
+short cc;
 unsigned short mem[65536];
 unsigned char brk[65536];
 unsigned char* console;
+unsigned int executions;
 int cns_index;
 int cns_length;
 int cns_max;
