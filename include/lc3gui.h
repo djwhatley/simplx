@@ -22,6 +22,7 @@ static unsigned short mem_cursor;
 static int memwin_state;
 static int dbgwin_state;
 static int cnswin_state;
+static int key_wait;
 
 WINDOW* create_win(int height, int width, int starty, int startx);
 void destroy_win(WINDOW* local_win);
@@ -32,6 +33,8 @@ void update_memwin();
 void update_regwin();
 void update_dbgwin();
 void update_cnswin();
+
+void wait_for_key();
 
 void hex_to_binstr(short hex, char* buffer);
 void dbggetstrw(int y, int x, const char* prompt, char* buffer);

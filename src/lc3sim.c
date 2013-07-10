@@ -138,6 +138,7 @@ void execute_instruction(lc3inst_t* instruction)
 	case TRAP:
 		switch (instruction->trapvect) {
 		case 0x20:
+			wait_for_key();
 			break;
 		case 0x21:
 			send_to_console((char)regfile[0]);

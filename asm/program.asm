@@ -19,6 +19,7 @@ M7
 	LDR R0, R3, 0
 	
 	TRAP x40
+	GETC
 	OUT
 
 	HALT
