@@ -1,5 +1,5 @@
 SRC=src
-OBJ=obj
+OBJ=bin
 ASM=asm
 
 default: simplx program test
