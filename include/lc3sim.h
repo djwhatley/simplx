@@ -70,6 +70,8 @@ int first;
 short next;
 lc3inst_t next_inst;
 
+int enable_udiv;
+
 short get_instruction();
 void decode_instruction(lc3inst_t* instruction, short raw_inst);
 void execute_instruction(lc3inst_t* instruction);

@@ -13,6 +13,8 @@ int main(int argc, char* argv[])
 		return -EINVAL;
 	}
 
+	enable_udiv = 1;
+
 	FILE* program;
 	if (!(program = fopen(argv[1], "r")))
 	{

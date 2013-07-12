@@ -156,6 +156,14 @@ void execute_instruction(lc3inst_t* instruction)
 			halted = 1;
 			running = 0;
 			break;
+		case 0x80:
+			if (enable_udiv)
+			{
+				unsigned short temp = regfile[0]/regfile[1];
+				regfile[1] = regfile[0]%regfile[1];
+				regfile[0] = temp;
+			}
+			break;
 		default:
 			old_pc = pc;
 			pc = mem[instruction->trapvect];
