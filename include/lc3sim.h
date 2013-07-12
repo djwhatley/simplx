@@ -47,7 +47,7 @@ typedef struct {
 	short pcoffset9;
 	short pcoffset11;
 	short offset6;
-	char trapvect;
+	short trapvect;
 	char jsrr_flag;
 	char imm5_flag;
 } lc3inst_t;

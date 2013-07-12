@@ -34,7 +34,7 @@ void update_regwin();
 void update_dbgwin();
 void update_cnswin();
 
-void wait_for_key();
+void wait_for_key(int print);
 
 void hex_to_binstr(short hex, char* buffer);
 void dbggetstrw(int y, int x, const char* prompt, char* buffer);

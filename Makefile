@@ -2,7 +2,7 @@ SRC=src
 OBJ=bin
 ASM=asm
 
-default: simplx program test
+default: simplx program
 
 #lc3sim:
 #	gcc -g -o $(OBJ)/lc3sim -lncurses $(SRC)/* 

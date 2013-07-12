@@ -234,12 +234,13 @@ void update_cnswin()
 	}
 }
 
-void wait_for_key()
+void wait_for_key(int print)
 {
 	refreshall();
 	char ch;
 	while(!(ch=getch()));
 	regfile[0] = (short)ch;
+	if (print) send_to_console(ch);
 }
 
 void hex_to_binstr(short hex, char* buffer)
