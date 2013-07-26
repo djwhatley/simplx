@@ -34,7 +34,7 @@ char comparenzp(char nzp)
 	return 0;
 }
 
-short signext(char value, char bits)
+short signext(short value, char bits)
 {
 	short mask1 = 1 << bits;
 	short mask2 = (short) 0xFFFF << bits;
@@ -64,7 +64,7 @@ void decode_instruction(lc3inst_t* instruction, short raw_inst)
 	instruction->pcoffset11 = signext((raw_inst & PC11_MASK) >> PC11_SHFT, 10);
 	instruction->offset6 = signext((raw_inst & OFF6_MASK) >> OFF6_SHFT, 5);
 	instruction->trapvect = (raw_inst & TRAP_MASK) >> TRAP_SHFT;
-	instruction->jsrr_flag = (raw_inst & JSRR_MASK) >> JSRR_SHFT;
+	instruction->jsrr_flag = !((raw_inst & JSRR_MASK) >> JSRR_SHFT);
 	instruction->imm5_flag = (raw_inst & IMMF_MASK) >> IMMF_SHFT;
 }
 
@@ -94,9 +94,9 @@ void execute_instruction(lc3inst_t* instruction)
 	case JSR:
 		old_pc = pc;
 		if (instruction->jsrr_flag)
-			pc = mem[regfile[instruction->src1reg]];
+			pc = regfile[instruction->src1reg];
 		else
-			pc = mem[pc+instruction->pcoffset11];
+			pc = pc+instruction->pcoffset11;
 		regfile[7] = old_pc;
 		break;
 	case AND:
@@ -321,7 +321,7 @@ void disassemble_to_str(short instruction, char* buffer)
 		sprintf(buffer, "ST R%d, #%d", inst.destreg, inst.pcoffset9);
 		break;
 	case JSR:
-		// TODO
+		sprintf(buffer, "JSR #%d", inst.pcoffset11);
 		break;
 	case AND:
 		if (inst.imm5_flag)

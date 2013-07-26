@@ -77,7 +77,7 @@ void decode_instruction(lc3inst_t* instruction, short raw_inst);
 void execute_instruction(lc3inst_t* instruction);
 void setcc(short writeval);
 char comparenzp(char nzp);
-short signext(char value, char bits);
+short signext(short value, char bits);
 void show_register_contents();
 void send_to_console(char c);
 void read_program(FILE* program);
