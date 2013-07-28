@@ -162,6 +162,8 @@ void execute_instruction(lc3inst_t* instruction)
 		case 0x80:
 			if (enable_udiv)
 			{
+				if (!regfile[1])
+					break;
 				unsigned short temp = regfile[0]/regfile[1];
 				regfile[1] = regfile[0]%regfile[1];
 				regfile[0] = temp;
