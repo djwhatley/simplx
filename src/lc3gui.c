@@ -22,6 +22,8 @@ int main(int argc, char* argv[])
 		return -EINVAL;
 	}
 
+	build_symbol_table(argv[1]);
+
 	pc = 0x3000;
 	running = 1;
 	read_program(program);
@@ -83,6 +85,53 @@ quit:
 	return 0;
 }
 
+void build_symbol_table(const char* filename)
+{
+	int namelength = strlen(filename);
+	char* symbolfile;
+
+	if (!(symbolfile = malloc(namelength)))
+	{
+		printf("Malloc returned NULL! That's no good!\n");
+		exit(-ENOMEM);
+	}
+
+	strncpy(symbolfile, filename, namelength-4);
+	symbolfile[namelength-4] = '.';
+	symbolfile[namelength-3] = 's';
+	symbolfile[namelength-2] = 'y';
+	symbolfile[namelength-1] = 'm';
+
+	FILE* symbols;
+	if (!(symbols = fopen(symbolfile, "r")))
+	{
+		printf("Couldn't find the symbol file!\n");
+		exit(-ENOENT);
+	}
+
+	//printf("\n\n%s\n\n", symbolfile);
+	//while(1);
+	unsigned short address;
+	char* symbol;
+	while (!feof(symbols))
+	{
+		symbol = (char*)malloc(16);
+		fscanf(symbols, "%4hx", &address);
+		printf("%4hx ", address); 
+		fscanf(symbols, "%s", symbol);
+		printf("%s\n", symbol); 
+		syms[address] = symbol;
+	}
+
+	free(symbolfile);
+	fclose(symbols);
+}
+/*
+char* getsym(unsigned short addr)
+{
+	return syms[addr] ? syms[addr] : "";
+}
+*/
 void initialize()
 {
 	initscr();
@@ -168,7 +217,7 @@ void update_memwin()
 		int c;
 		for (c=0; c<COLS-REGWIN_WIDTH-WINDOW_PADDING*2; c++)
 			mvwprintw(MEMWIN, i+WINDOW_PADDING, c+WINDOW_PADDING, " ");
-		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr);
+		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s\t  %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr, syms[addr] ? syms[addr] : "");
 		wattroff(MEMWIN, A_STANDOUT);
 		wattroff(MEMWIN, COLOR_PAIR(1));
 	}

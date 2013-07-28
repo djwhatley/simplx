@@ -24,6 +24,9 @@ static int dbgwin_state;
 static int cnswin_state;
 static int key_wait;
 
+void build_symbol_table(const char* filename);
+//char* getsym(unsigned short addr);
+
 WINDOW* create_win(int height, int width, int starty, int startx);
 void destroy_win(WINDOW* local_win);
 void initialize();

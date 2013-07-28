@@ -58,6 +58,7 @@ unsigned short ir;
 short cc;
 unsigned short mem[65536];
 unsigned char brk[65536];
+unsigned char* syms[65536];
 unsigned char* console;
 unsigned int executions;
 int cns_index;
