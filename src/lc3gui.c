@@ -109,8 +109,6 @@ void build_symbol_table(const char* filename)
 		exit(-ENOENT);
 	}
 
-	//printf("\n\n%s\n\n", symbolfile);
-	//while(1);
 	unsigned short address;
 	char* symbol;
 	while (!feof(symbols))
@@ -120,18 +118,13 @@ void build_symbol_table(const char* filename)
 		printf("%4hx ", address); 
 		fscanf(symbols, "%s", symbol);
 		printf("%s\n", symbol); 
-		syms[address] = symbol;
+		if (*symbol) syms[address] = symbol;
 	}
 
 	free(symbolfile);
 	fclose(symbols);
 }
-/*
-char* getsym(unsigned short addr)
-{
-	return syms[addr] ? syms[addr] : "";
-}
-*/
+
 void initialize()
 {
 	initscr();
