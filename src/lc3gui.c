@@ -217,7 +217,8 @@ void update_memwin()
 		int c;
 		for (c=0; c<COLS-REGWIN_WIDTH-WINDOW_PADDING*2; c++)
 			mvwprintw(MEMWIN, i+WINDOW_PADDING, c+WINDOW_PADDING, " ");
-		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s\t  %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr, syms[addr] ? syms[addr] : "");
+		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr);
+		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING+73, "%s", syms[addr] ? syms[addr] : "");
 		wattroff(MEMWIN, A_STANDOUT);
 		wattroff(MEMWIN, COLOR_PAIR(1));
 	}
