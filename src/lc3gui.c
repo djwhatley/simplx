@@ -115,9 +115,7 @@ void build_symbol_table(const char* filename)
 	{
 		symbol = (char*)malloc(16);
 		fscanf(symbols, "%4hx", &address);
-		printf("%4hx ", address); 
 		fscanf(symbols, "%s", symbol);
-		printf("%s\n", symbol); 
 		if (*symbol) syms[address] = symbol;
 	}
 
@@ -178,10 +176,10 @@ WINDOW* create_win(int height, int width, int y, int x)
 void refreshall()
 {
 	int i;
-	update_memwin();
 	update_regwin();
 	update_dbgwin();
 	update_cnswin();
+	update_memwin();
 	for (i=0; i<windex; i++)
 		wrefresh(windows[i]);
 	refresh();
@@ -211,7 +209,7 @@ void update_memwin()
 		for (c=0; c<COLS-REGWIN_WIDTH-WINDOW_PADDING*2; c++)
 			mvwprintw(MEMWIN, i+WINDOW_PADDING, c+WINDOW_PADDING, " ");
 		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING, "%c x%.4hx\t x%.4hx\t %.5d\t %s\t %s", brk[addr] ? '@' : ' ', addr, curr, curr, binstring, disasmstr);
-		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING+73, "%s", syms[addr] ? syms[addr] : "");
+		mvwprintw(MEMWIN, i+WINDOW_PADDING, WINDOW_PADDING+73, "%s", syms[addr] ? (const char*)syms[addr] : "");
 		wattroff(MEMWIN, A_STANDOUT);
 		wattroff(MEMWIN, COLOR_PAIR(1));
 	}

@@ -180,21 +180,6 @@ void execute_instruction(lc3inst_t* instruction)
 	executions++;
 }
 
-/*void show_register_contents()
-{
-	printf("Register contents:\n"
-				 "R0: x%.4hx\tR1: x%.4hx\n"
-				 "R2: x%.4hx\tR3: x%.4hx\n"
-				 "R4: x%.4hx\tR5: x%.4hx\n"
-				 "R6: x%.4hx\tR7: x%.4hx\n",
-				 regfile[0], regfile[1],
-				 regfile[2], regfile[3],
-				 regfile[4], regfile[5],
-				 regfile[6], regfile[7]
-			);
-	printf("PC: x%.4hx\n", pc);
-}*/
-
 void send_to_console(const char c)
 {
 	static int cindex = 0;
@@ -263,12 +248,6 @@ void run_program()
 			brk[pc-1] = 2;
 			break;
 		}
-		//execute_instruction(&next_inst);
-		//if (!halted)
-		//{
-		//	next = fetch_instruction();
-		//	decode_instruction(&next_inst, next);
-		//}
 		step_forward();
 		if (brk[pc-1] == 2)
 			brk[pc-1] = 1;
