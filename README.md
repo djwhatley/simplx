@@ -1,4 +1,4 @@
 Simplx
 ======
 
-LC-3 emulator/debugger written in C using ncurses (for now)
+LC-3 simulator/debugger written in C using ncurses (for now)
