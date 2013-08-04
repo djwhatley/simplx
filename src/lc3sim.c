@@ -1,3 +1,13 @@
+/**
+ * @file		lc3sim.c
+ * @author	Daniel Whatley
+ * @date		May, 2013
+ * @brief		C file for lc3 simulator
+ *
+ * This file contains the code to simulate the LC-3 computer.
+ * Note that this is a simulator, not an emulator; it is only required to simulate the output, not the actual internal workings of the system.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,6 +15,10 @@
 
 static FILE* file;
 
+/**
+ * @name 	Set Condition Code
+ * @param [short] writeval Value to write to the CC (negative, zero, or positive)
+ */
 void setcc(short writeval)
 {
 	if (writeval < 0)
@@ -15,36 +29,55 @@ void setcc(short writeval)
 		cc = 1;
 }
 
+/**
+ * @name 	Compare NZP
+ * @param [char] nzp An NZP condition from a branch instruction
+ * @retval 1	condition code met specified NZP condition
+ * @retval 0	condition code did not meet specified NZP condition
+ */
 char comparenzp(char nzp)
 {
-	if (nzp == 7)
+	if (nzp == 7)									// nzp (always true)
 		return 1;
-	else if (nzp == 6 && cc <= 0)
+	else if (nzp == 6 && cc <= 0) // nz
 		return 1;
-	else if (nzp == 5 && cc != 0)
+	else if (nzp == 5 && cc != 0)	// np
 		return 1;
-	else if (nzp == 4 && cc < 0)
+	else if (nzp == 4 && cc < 0)	// n
 		return 1;
-	else if (nzp == 3 && cc >= 0)
+	else if (nzp == 3 && cc >= 0)	// zp
 		return 1;
-	else if (nzp == 2 && cc == 0)
+	else if (nzp == 2 && cc == 0)	// z
 		return 1;
-	else if (nzp == 1 && cc > 0)
+	else if (nzp == 1 && cc > 0)	// p
 		return 1;
 	return 0;
 }
 
+/**
+ * @name 	Sign Extend
+ * @brief Extends a value to 16 bits
+ * @param [short] value The value to be sign-extended
+ * @param [char] 	bits 	The number of bits in the value (starting from the right) that should be extended
+ * @retval The given value extended to 16 bits
+ */
 short signext(short value, char bits)
 {
-	short mask1 = 1 << bits;
-	short mask2 = (short) 0xFFFF << bits;
-	char ret = 0;
-	if ((short)value & mask1)
-		ret = (short) mask2 | value;
+	short mask1 = 1 << bits;							// Make a mask to check the highest bit in the specified range
+	short mask2 = (short) 0xFFFF << bits;	// Make a mask to set the high bits of the return value if negative
+	short ret = 0;
+	if ((short)value & mask1)							// If the highest bit in rhe range is 1, then it's a negative number
+		ret = (short) mask2 | value;				// Use the second mask to extend the sign bit
 	else
-		ret = (short) ret | value;
+		ret = (short) ret | value;					// Otherwise just return the larger number.
+	return ret;
 }
 
+/**
+ * @name 	Fetch Instruction
+ * @brief Fetches the next instruction to be executed
+ * @retval The next instruction
+ */
 short fetch_instruction()
 {
 	ir = mem[pc];
@@ -52,6 +85,12 @@ short fetch_instruction()
 	return ir;
 }
 
+/**
+ * @name 	Decode Instruction
+ * @brief Fills in the various values from a raw instruction
+ * @param [lc3inst_t*] instruction 	A pointer to the instruction struct to be filled
+ * @param [short] raw_inst	The raw instruction value as a 16-bit number
+ */
 void decode_instruction(lc3inst_t* instruction, short raw_inst)
 {
 	instruction->opcode = (raw_inst & OPCODE_MASK) >> OPCODE_SHFT;
@@ -68,15 +107,21 @@ void decode_instruction(lc3inst_t* instruction, short raw_inst)
 	instruction->imm5_flag = (raw_inst & IMMF_MASK) >> IMMF_SHFT;
 }
 
+/** name	Execute Instruction
+ * @brief Executes an Lc-3 instruction
+ * @param [lc3inst_t*] instruction	A pointer to the instruction to be executed
+ */
 void execute_instruction(lc3inst_t* instruction)
 {
 	short old_pc;
 	short old_reg0;
 	switch (instruction->opcode) {
+	// Branch
 	case BR:
 		if (comparenzp(instruction->nzpbits))
 			pc += instruction->pcoffset9;
 		break;
+	// Add
 	case ADD:
 		if (instruction->imm5_flag)
 			regfile[instruction->destreg] = regfile[instruction->src1reg] + instruction->imm5;
@@ -84,13 +129,16 @@ void execute_instruction(lc3inst_t* instruction)
 			regfile[instruction->destreg] = regfile[instruction->src1reg] + regfile[instruction->src2reg];
 		setcc(regfile[instruction->destreg]);
 		break;
+	// Load
 	case LD:
 		regfile[instruction->destreg] = mem[pc+instruction->pcoffset9];
 		setcc(regfile[instruction->destreg]);
 		break;
+	// Store
 	case ST:
 		mem[pc+instruction->pcoffset9] = regfile[instruction->destreg];
 		break;
+	// Jump to Subroutine
 	case JSR:
 		old_pc = pc;
 		if (instruction->jsrr_flag)
@@ -99,6 +147,7 @@ void execute_instruction(lc3inst_t* instruction)
 			pc = pc+instruction->pcoffset11;
 		regfile[7] = old_pc;
 		break;
+	// And
 	case AND:
 		if (instruction->imm5_flag)
 			regfile[instruction->destreg] = regfile[instruction->src1reg] & instruction->imm5;
@@ -106,43 +155,55 @@ void execute_instruction(lc3inst_t* instruction)
 			regfile[instruction->destreg] = regfile[instruction->src1reg] & regfile[instruction->src2reg];
 		setcc(regfile[instruction->destreg]);
 		break;
+	// Load Register
 	case LDR:
 		regfile[instruction->destreg] = mem[regfile[instruction->src1reg] + instruction->offset6];
 		setcc(regfile[instruction->destreg]);
 		break;
+	// Store Register
 	case STR:
 		mem[regfile[instruction->src1reg] + instruction->offset6] = regfile[instruction->destreg];
 		break;
+	// Return from Interrupt
 	case RTI:
 		break;
+	// Not
 	case NOT:
 		regfile[instruction->destreg] = ~regfile[instruction->src1reg];
 		setcc(regfile[instruction->destreg]);
 		break;
+	// Load Indirect
 	case LDI:
 		regfile[instruction->destreg] = mem[mem[pc+instruction->pcoffset9]];
 		setcc(regfile[instruction->destreg]);
 		break;
+	// Store Indirect
 	case STI:
 		mem[mem[pc+instruction->pcoffset9]] = regfile[instruction->destreg];
 		break;
+	// Jump
 	case JMP:
 		old_pc = pc;
 		pc = regfile[instruction->src1reg];
 		regfile[7] = old_pc;
 		break;
+	// Load Effective Address
 	case LEA:
 		regfile[instruction->destreg] = pc + instruction->pcoffset9;
 		setcc(regfile[instruction->destreg]);
 		break;
+	// Trap
 	case TRAP:
 		switch (instruction->trapvect) {
+		// GETC
 		case 0x20:
 			wait_for_key(0);
 			break;
+		// OUT
 		case 0x21:
 			send_to_console((char)regfile[0]);
 			break;
+		// PUTS
 		case 0x22:
 			old_reg0 = regfile[0];
 			while (mem[regfile[0]])
@@ -152,13 +213,16 @@ void execute_instruction(lc3inst_t* instruction)
 			}
 			regfile[0] = old_reg0;
 			break;
+		// IN
 		case 0x23:
 			wait_for_key(1);
 			break;
+		// HALT
 		case 0x25:
 			halted = 1;
 			running = 0;
 			break;
+		// UDIV
 		case 0x80:
 			if (enable_udiv)
 			{
@@ -169,6 +233,7 @@ void execute_instruction(lc3inst_t* instruction)
 				regfile[0] = temp;
 			}
 			break;
+		// Generic trap
 		default:
 			old_pc = pc;
 			pc = mem[instruction->trapvect];
@@ -180,44 +245,57 @@ void execute_instruction(lc3inst_t* instruction)
 	executions++;
 }
 
+/**
+ * @name 	Send to Console
+ * @brief Sends a character to the console to be printed
+ * @param [const char] c The character to be sent to the console
+ */
 void send_to_console(const char c)
 {
 	static int cindex = 0;
 	console[cindex] = c;
 	cindex++;
-	if (cns_length < cns_max)
+	if (cns_length < cns_max)		// Update the length of the text in the console, if it isn't at max capacity
 		cns_length++;
-	if (cindex-1 >= cns_length)
+	if (cindex-1 >= cns_length)	// Make sure the console index isn't greater than the console size
 		cindex %= cns_length;
 }
 
+/**
+ * @name 	Read Program
+ * @brief Reads an assembled LC-3 program from a file
+ * @param [FILE*] program Pointer to the assembled LC-3 program as an opened FILE
+ */
 void read_program(FILE* program)
 {
-	unsigned short a = 1;
+	unsigned short a = 1;	// beautiful variable names
 	unsigned short address;
 	unsigned char num = 0;
-	unsigned short b;
+	unsigned short b;	// exquisite
 
-	rewind(program);
+	rewind(program); // Be kind, rewind!
 
+	// This loop reads the format of the object file into two 
 	while(a != 0xffff)
 	{
 		a = ((fgetc(program) << 8) | fgetc(program));
-		if (!num)
+		if (!num) // The first number is actually an address, not an instruction.
 		{
-			address = a;
-			a = ((fgetc(program) << 8) | fgetc(program));
-			num = a;
-			b = address + num;
+			address = a;	// Set the address
+			a = ((fgetc(program) << 8) | fgetc(program));	// The second number is how many instructions are next
+			num = a;	// Set the number of following instructions
+			b = address + num;	// How to derive the addresses of the other things in the else block
 		} else {
-			mem[b-num] = a;
-			num--;
+			mem[b-num] = a;	// Derives the address of the instruction
+			num--;	// One fewer instruction to process before the next block (or the end)
 		}
 	}
 
+	// Set up some console stuff
 	cns_index = 0;
 	cns_length = 0;
 
+	// Prefetch and decode the first instruction so the PC and IR values accurately reflect the current state of the machine
 	next = fetch_instruction();
 	decode_instruction(&next_inst, next);
 }
