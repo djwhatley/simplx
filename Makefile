@@ -8,7 +8,7 @@ default: simplx program
 #	gcc -g -o $(OBJ)/lc3sim -lncurses $(SRC)/* 
 
 simplx:
-	gcc -g -o $(OBJ)/simplx -lncurses $(SRC)/*
+	gcc -ggdb -o $(OBJ)/simplx -lncurses $(SRC)/*
 
 program:
 	as2obj $(ASM)/program.asm
